@@ -1,4 +1,5 @@
 import {useState} from 'react'
+import swal from 'sweetalert'
 
 export default function AddTask({addTask}) {
     const [text, setText] = useState('')
@@ -8,7 +9,7 @@ export default function AddTask({addTask}) {
     const onSubmit = (e) => {
         e.preventDefault();
         if(!text) {
-            alert("Please add task");
+            swal('Please enter some task')
             return
         } else {
             addTask({text, day, reminder});
