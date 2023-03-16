@@ -3,7 +3,7 @@ import Header from './components/Header'
 import Tasks from './components/Tasks'
 import AddTask from './components/AddTask';
 
-function App() {
+export default function App() {
   const [showAddTask, setShowAddTask] = useState(false)
   const [tasks, setTasks] = useState([]);
 
@@ -11,7 +11,7 @@ function App() {
   const fetchTasks = async() => {
     const res = await fetch('http://localhost:5000/tasks');
     const data = await res.json();
-    return data
+    return data;
   };
   
   // fetch task
@@ -81,9 +81,3 @@ function App() {
     </div>
   );
 }
-
-
-
-
-
-export default App;
