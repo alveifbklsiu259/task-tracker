@@ -1,10 +1,11 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk, createEntityAdapter } from '@reduxjs/toolkit';
 
-const initialState = {
-    tasks: [],
+const tasksAdapter = createEntityAdapter()
+
+const initialState = tasksAdapter.getInitialState({
     status: null,
     showAddTask: false
-};
+})
 
 // thunk function
 const targetURL = 'http://localhost:5000/tasks'
@@ -43,7 +44,7 @@ export const toggleTask = createAsyncThunk('tasks/taskToggled', async task => {
         body: JSON.stringify({...task, reminder: !task.reminder})
     });
     const data = await response.json();
-    return data.id
+    return data
 })
 
 const tasksSlice = createSlice({
@@ -59,38 +60,37 @@ const tasksSlice = createSlice({
     extraReducers: builder => {
         builder
             .addCase(getTasks.pending, (state, action) => {
-                return {
-                    ...state, status: 'loading'
-                }
+                state.status = 'loading'
             })
             .addCase(getTasks.fulfilled, (state, action) => {
-                return {
-                    ...state, status: 'idle', tasks: action.payload
-                }
+                state.status = 'idle';
+                tasksAdapter.setAll(state, action.payload)
             })
             .addCase(getTasks.rejected, (state, action) => {
                 return {
                     ...state, status: 'error'
                 }
             })
-            .addCase(addTask.fulfilled, (state, action) => {
-                state.tasks.push(action.payload)
-            })
-            .addCase(deleteTask.fulfilled, (state, action) => {
-                return {
-                    ...state, tasks: state.tasks.filter(task => task.id !== action.payload)
-                }
-            })
+            .addCase(addTask.fulfilled, tasksAdapter.addOne)
+            .addCase(deleteTask.fulfilled, tasksAdapter.removeOne)
             .addCase(toggleTask.fulfilled, (state, action) => {
-                return {...state, tasks: state.tasks.map(task => task.id === action.payload ? {...task, reminder: !task.reminder} : task)}
+                const {id, reminder} = action.payload
+                const existingTask = state.entities[id];
+                if (existingTask) {
+                    existingTask.reminder = reminder
+                }
+                // return {...state, tasks: state.tasks.map(task => task.id === action.payload ? {...task, reminder: !task.reminder} : task)}
             })
     }
 })
 
 // selector
-export const selectTasks = state => state.tasks.tasks
 export const selecStatus = state => state.tasks.status
 export const selectShowAddTaskVal = state => state.tasks.showAddTask
+
+export const {
+    selectAll: selectTasks,
+} = tasksAdapter.getSelectors(state => state.tasks)
 
 export const {tasksLoaded, taskAdded, taskDeleted, taskToggled, addFormToggled, tasksLoading, loadingError } = tasksSlice.actions
 export default tasksSlice.reducer
