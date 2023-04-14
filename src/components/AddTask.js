@@ -1,18 +1,19 @@
-import {useState} from 'react'
+import { useState } from 'react'
 import swal from 'sweetalert'
 
 export default function AddTask({addTask}) {
     const [text, setText] = useState('')
     const [day, setDay] = useState('')
     const [reminder, setReminder] = useState(false)
+    const canSave = [text, day].every(Boolean);
 
-    const onSubmit = (e) => {
+    const onSubmit = e => {
         e.preventDefault();
-        if(!text) {
-            swal('Please enter some task')
+        if(!canSave) {
+            swal('Please enter some task or day & time')
             return
         } else {
-            addTask({text, day, reminder});
+            addTask({text, day, reminder, id: +(Math.random() * 10000).toFixed(0)});
             setText('')
             setDay('')
             setReminder(false)
@@ -32,7 +33,6 @@ export default function AddTask({addTask}) {
             <div className="form-control form-control-check">
                 <label>Set Reminder</label>
                 <input type="checkbox" checked={reminder}  onChange={(e) => {setReminder(e.target.checked)}}/>
-                {/* <input type="checkbox" value={reminder} onChange={(e) =>  {setReminder(e.currentTarget.checked)}}/> */}
             </div>
             <input type="submit" value="Save Task" className="btn btn-block"/>
         </form>

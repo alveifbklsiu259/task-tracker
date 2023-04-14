@@ -1,36 +1,31 @@
-import React, {useState, useEffect} from 'react'
-import Header from './components/Header'
-import Tasks from './components/Tasks'
+import React, {useEffect, useCallback} from 'react';
+import Header from './components/Header';
+import Tasks from './components/Tasks';
 import AddTask from './components/AddTask';
+import { useTasksFunc} from './components/TasksProvider';
+
+const targetURL = 'http://localhost:5000/tasks'
 
 export default function App() {
-  const [showAddTask, setShowAddTask] = useState(false)
-  const [tasks, setTasks] = useState([]);
-
-  // fetch tasks
-  const fetchTasks = async() => {
-    const res = await fetch('http://localhost:5000/tasks');
-    const data = await res.json();
-    return data;
-  };
+  const {state, dispatch} = useTasksFunc();
   
-  // fetch task
-  const fetchTask = async(id) => {
-    const res = await fetch(`http://localhost:5000/tasks/${id}`);
-    const data = await res.json();
-    return data;
-  };
-
   useEffect(() => {
     const getTasks = async () => {
-      const dataFromServer = await fetchTasks();
-      setTasks(dataFromServer);
+      dispatch({type: 'tasksLoading'})
+      try {
+        const response = await fetch(targetURL);
+        const data = await response.json()
+        dispatch({type: 'tasksLoaded', payload: data})
+      } catch {
+        dispatch({type: 'loadingError'})
+      }
+        
     };
     getTasks();
-  }, []) 
+  }, [dispatch])
 
-  async function handleAddTask(task) {
-    const res = await fetch('http://localhost:5000/tasks', {
+  const handleAddTask = useCallback(async task => {
+    const res = await fetch(targetURL, {
       method: "POST",
       headers: {
         'Content-type': 'application/json'
@@ -38,46 +33,34 @@ export default function App() {
       body: JSON.stringify(task)
     });
     const data = await res.json();
-    setTasks([...tasks, data])
-
-    // const id = Math.floor(Math.random() * 10000 + 1);
-    // const newTask = {...task, id}
-    // setTasks([...tasks, newTask])
-  }
+    dispatch({type: 'addTask', payload: data});
+  }, [dispatch])
   
-  async function handleDelete(id) {
-    await fetch(`http://localhost:5000/tasks/${id}`, {
+  const handleDelete = useCallback(async id => {
+    await fetch(`${targetURL}/${id}`, {
       method: "DELETE"
     })
-    
-    setTasks(tasks.filter((task) => {
-      return task.id !== id
-    }))
-  }
+    dispatch({type: 'deleteTask', payload: id})
+  }, [dispatch])
 
-  async function handleReminder(id) {
-    const taskToToggle = await fetchTask(id);
-    const updTask = {...taskToToggle, reminder:!taskToToggle.reminder};
-
-    const res = await fetch(`http://localhost:5000/tasks/${id}`, {
+  const handleReminder = useCallback(async id => {
+    const target = state.tasks.find(task => task.id === id)
+    const updTask = {...target, reminder:!target.reminder};
+    await fetch(`${targetURL}/${id}`, {
       method: "PUT",
       headers: {
         "Content-type": "application/json"
       },
       body: JSON.stringify(updTask)
     });
-    const data = await res.json();
-    
-    setTasks(tasks.map((task) => {
-      return  task.id === id ? {...task, reminder: data.reminder} : task
-    }))
-  }
+    dispatch({type: 'toggleTask', payload: id})
+  }, [state, dispatch])
 
   return (
     <div className="container">
-      <Header showAddTask={showAddTask} handleAddForm={()=> {setShowAddTask(!showAddTask)}}/>
-      {showAddTask && <AddTask addTask={handleAddTask} />}
-      {tasks.length > 0 ? <Tasks tasks={tasks} toggleReminder={handleReminder} onDelete={handleDelete}/> : 'No Tasks to show'}
+      <Header/>
+      {state.showAddTask && <AddTask addTask={handleAddTask} />}
+      <Tasks toggleReminder={handleReminder} onDelete={handleDelete}/>
     </div>
   );
-}
+};

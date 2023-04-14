@@ -1,8 +1,17 @@
 import PropTypes from 'prop-types'
+import { useTasksFunc } from './TasksProvider'
 
-const Button = ({handleAddForm, color, text}) => {
+const Button = () => {
+    const {state, dispatch} = useTasksFunc()
 
-    return <button onClick={handleAddForm} style={{backgroundColor: color}} className="btn">{text}</button>
+    return (
+        <button 
+            onClick={() => { dispatch({type: 'toggleAddForm'})}} 
+            style={{backgroundColor: state.showAddTask ? "red" : "green"}} 
+            className="btn"
+        >{state.showAddTask ? 'Close' : "Add"}
+        </button>
+    ) 
 }
 
 export default Button
