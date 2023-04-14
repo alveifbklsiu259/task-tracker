@@ -2,11 +2,14 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import './index.css'
-import TasksProvider from './components/TasksProvider';
+import store from './store';
+import { Provider } from 'react-redux';
+import { handleGetTasks} from './features/tasks/tasksSlice';
 
+store.dispatch(handleGetTasks())
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
-    <TasksProvider>
+    <Provider store={store}>
         <App />
-    </TasksProvider>
+    </Provider>
 );

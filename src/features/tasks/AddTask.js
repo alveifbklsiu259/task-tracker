@@ -1,19 +1,21 @@
 import { useState } from 'react'
 import swal from 'sweetalert'
+import { useDispatch } from 'react-redux'
+import { handleAddTask } from './tasksSlice'
 
-export default function AddTask({addTask}) {
+export default function AddTask() {
     const [text, setText] = useState('')
     const [day, setDay] = useState('')
     const [reminder, setReminder] = useState(false)
     const canSave = [text, day].every(Boolean);
-
+    const dispatch = useDispatch()
     const onSubmit = e => {
         e.preventDefault();
         if(!canSave) {
             swal('Please enter some task or day & time')
             return
         } else {
-            addTask({text, day, reminder, id: +(Math.random() * 10000).toFixed(0)});
+            dispatch(handleAddTask({text, day, reminder, id: +(Math.random() * 10000).toFixed(0)}))
             setText('')
             setDay('')
             setReminder(false)
