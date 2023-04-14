@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import swal from 'sweetalert'
 import { useDispatch } from 'react-redux'
-import { handleAddTask } from './tasksSlice'
+import { addTask } from './tasksSlice'
 
 export default function AddTask() {
     const [text, setText] = useState('')
@@ -15,7 +15,7 @@ export default function AddTask() {
             swal('Please enter some task or day & time')
             return
         } else {
-            dispatch(handleAddTask({text, day, reminder, id: +(Math.random() * 10000).toFixed(0)}))
+            dispatch(addTask({text, day, reminder, id: +(Math.random() * 10000).toFixed(0)}))
             setText('')
             setDay('')
             setReminder(false)

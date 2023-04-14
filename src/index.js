@@ -4,9 +4,10 @@ import App from './App';
 import './index.css'
 import store from './store';
 import { Provider } from 'react-redux';
-import { handleGetTasks} from './features/tasks/tasksSlice';
+import { getTasks} from './features/tasks/tasksSlice';
 
-store.dispatch(handleGetTasks())
+store.dispatch(getTasks())
+
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
     <Provider store={store}>
