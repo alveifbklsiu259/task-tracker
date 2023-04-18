@@ -1,17 +1,23 @@
 import { memo } from "react";
 import Task from './Task';
-import { useSelector} from "react-redux";
-import { selectTasks, selecStatus } from './tasksSlice'
+import { useSelector} from 'react-redux'
+import {useGetTasksQuery, selectTasks} from './tasksSlice'
 
 const Tasks = memo(function Tasks() {
-    const status = useSelector(selecStatus);
-    const tasks = useSelector(selectTasks);
+    const tasks = useSelector(selectTasks)
+
+    const {
+        isLoading,
+        isSuccess,
+        isError,
+    } = useGetTasksQuery()
+
     let content;
-    if (status === 'loading') {
+    if (isLoading) {
         content = <p>Loading...</p>
-    } else if (status === 'idle' && tasks.length === 0) {
+    } else if (isSuccess && tasks.length === 0) {
         content = <p>No Tasks to show</p>
-    } else if (status === 'error') {
+    } else if (isError) {
         content = <p style={{color: 'red'}}>Please connect to the json server at port 5000</p>
     } else {
         content = (

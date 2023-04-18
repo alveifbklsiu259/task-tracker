@@ -1,7 +1,7 @@
 import Header from './features/tasks/Header';
 import Tasks from './features/tasks/Tasks';
 import AddTask from './features/tasks/AddTask';
-import { useSelector } from 'react-redux'
+import { useSelector } from 'react-redux';
 import { selectShowAddTaskVal } from './features/tasks/tasksSlice';
 
 export default function App() {
